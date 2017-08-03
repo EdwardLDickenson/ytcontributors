@@ -9,45 +9,37 @@ import ttk
 from comment import *
 
 comments = [];
+replies = [];
 authors = [];
 nextToken = "";
 
-def getByID(vid):
+def getReplies(comment):
+	replyList = [];
 
-	results = comment_threads_list_by_video_id(service, part='snippet, replies', videoId=vid, maxResults=100)
-	print(results.keys());
+	if "replies" in comment.keys():
+		for i in range(len(comment["replies"]["comments"])):
+			replyList.append(comment["replies"]["comments"][i]["snippet"]["textOriginal"])
 
-	while("nextPageToken" in results.keys()):
+	return replyList;
 
-		nextToken = results["nextPageToken"];
-
-		items = results["items"];
-
-		print(items[0]["snippet"]["topLevelComment"]["snippet"].keys());
-		for i in range(len(items)):
-			item = items[i]["snippet"]["topLevelComment"]["snippet"];
-			comment = Comment(text=item["textOriginal"], author=item["authorDisplayName"], likes=item["likeCount"], id=item["authorChannelId"], time=["publishedAt"]);
-			comments.append(comment);
-
-		results = comment_threads_list_by_video_id(service, part='snippet, replies', videoId=vid, maxResults=100, pageToken=nextToken)
-
-	items = results["items"];
+def getComments(items):
+	commentList = [];
 
 	for i in range(len(items)):
 		item = items[i]["snippet"]["topLevelComment"]["snippet"];
+		getReplies(items[i]);
 		comment = Comment(text=item["textOriginal"], author=item["authorDisplayName"], likes=item["likeCount"], id=item["authorChannelId"], time=["publishedAt"]);
-		comments.append(comment);
+		commentList.append(comment);
+		replies.extend(getReplies(item));
 
-	numComments.set("Number of Comments: " + str(len(comments)));
+	return commentList;
 
 def formatCommentsForDisplay(comments):
 	formatted = "";
 
 	for i in range(len(comments)):
 		formatted = formatted + str(i) + ") "
-
 		formatted = formatted + comments[i].getText().encode('utf-8','ignore');
-
 		formatted = formatted + "\n";
 
 	return formatted;
@@ -57,8 +49,24 @@ def displayComments():
 		return;
 
 	commentDisplayBox.insert(END, formatCommentsForDisplay(comments));
-
 	commentsVScroll.config(command=commentDisplayBox.yview);
+
+def getByID(vid):
+	results = comment_threads_list_by_video_id(service, part='snippet, replies', videoId=vid, maxResults=100)
+
+	while("nextPageToken" in results.keys()):
+		nextToken = results["nextPageToken"];
+
+		items = results["items"];
+
+		comments.extend(getComments(items));
+
+		results = comment_threads_list_by_video_id(service, part='snippet, replies', videoId=vid, maxResults=100, pageToken=nextToken)
+
+	items = results["items"];
+	comments.extend(getComments(items));
+
+	numComments.set("Number of Comments: " + str(len(comments)));
 
 def getVideoID(*args):
 	idOfVideo = vidEntry.get();
@@ -74,31 +82,33 @@ numComments = StringVar();
 mainframe = Frame(root);
 mainframe.grid(row=0, column=0);
 
-commentFrame = Frame(root);
-commentFrame.grid(row=4);
+#commentFrame = Frame(mainframe);
+#commentFrame.grid(row=4);
 
-commentsVScroll = Scrollbar(commentFrame);
-commentsVScroll.grid(row=4, column=10);
+#commentsVScroll = Scrollbar(commentFrame);
+commentsVScroll = Scrollbar(mainframe);
+commentsVScroll.grid(row=4, column=5);
 
-getIDLabel = Label(root, text="Video ID");
+getIDLabel = Label(mainframe, text="Video ID");
 getIDLabel.grid(row=0, column=0);
 
-idLabel = Label(root, textvariable=ID);
-idLabel.grid(row=0, column=2);
+vidEntry = Entry(mainframe);
+vidEntry.grid(row=0, column=1);
 
-vidEntry = Entry(root);
-vidEntry.grid(row=1, column=0);
+getButton = Button(mainframe, text="Get Comments", command=getVideoID);
+getButton.grid(row=2);
 
-getIdButton = Button(root, text="Get Comments", command=getVideoID);
-getIdButton.grid(row=2);
-
-displayButton = Button(root, text="Display Comments", command=displayComments);
+displayButton = Button(mainframe, text="Display Comments", command=displayComments);
 displayButton.grid(row=3);
 
-commentDisplayBox = Text(commentFrame, height=30, width=150, yscrollcommand=commentsVScroll.set);
-commentDisplayBox.grid(row=4);
+#idLabel = Label(mainframe, textvariable=ID);
+#idLabel.grid(row=0, column=2);
 
-numCommentsLabel = Label(root, textvariable=numComments);
+#commentDisplayBox = Text(commentFrame, height=30, width=150, yscrollcommand=commentsVScroll.set);
+commentDisplayBox = Text(mainframe, height=30, width=100, yscrollcommand=commentsVScroll.set);
+commentDisplayBox.grid(row=4, column=0);
+
+numCommentsLabel = Label(mainframe, textvariable=numComments);
 numCommentsLabel.grid(row=5, column=0);
 
 root.mainloop();

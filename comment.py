@@ -4,6 +4,7 @@ class Comment:
 	commentAuthor = "";
 	commentAuthorID = "";
 	commentTimeStamp = "";	#	Probably should not be a string
+	commentReplyCount = 0;
 
 	def __init__(self, likes=0, text="", author="", id="", time=""):
 		self.commentText = text;
@@ -11,6 +12,8 @@ class Comment:
 		self.commentAuthor = author;
 		self.commentAuthorID = id;
 		self.commentTimeStamp = time;
+
+	#	Accesesors
 
 	def getText(self):
 		return self.commentText;
@@ -27,8 +30,7 @@ class Comment:
 	def getTime(self):
 		return self.commentTimeStamp;
 
-	#	Should really impose a type system on the user defined files.
-	#	And in the constructor
+	#	Mutators
 
 	def setText(self, newText):
 		self.commentText = newText;
@@ -44,3 +46,5 @@ class Comment:
 
 	def setTime(self, newTime):
 		self.commentTimeStamp = newTime;
+
+#	Most of the mutators will probably go unused, but it's nice to have them anway

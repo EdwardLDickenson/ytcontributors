@@ -63,8 +63,3 @@ def comment_threads_list_by_video_id(service, **kwargs):
 	results = service.commentThreads().list(**kwargs).execute()
 
 	return results;
-
-#print("Enter the video ID: ");
-#	vid is Video ID
-#vid = raw_input("Enter the video ID: ");
-#comment_threads_list_by_video_id(service, part='snippet, replies', videoId='3M0Ao0G4T00')
