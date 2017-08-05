@@ -1,114 +1,78 @@
-#	Import YouTube API and whatever API wrappers are being used
-from getcomments import *
+import sys
+from PyQt4 import QtGui
+from PyQt4.QtGui import *
 
-#	Import GUI deps
-from Tkinter import *
-import ttk
+from main import *
 
-#	Import internal methods and structures
-from comment import *
+def getVideoID():
+	id = idInput.text()
 
-comments = [];
-replies = [];
-authors = [];
-nextToken = "";
+	if id == "":
+		id = "wwyXQn9g40I"	#	Allman Brother's Blue Sky
 
-def getReplies(comment):
-	replyList = [];
-
-	if "replies" in comment.keys():
-		for i in range(len(comment["replies"]["comments"])):
-			replyList.append(comment["replies"]["comments"][i]["snippet"]["textOriginal"])
-
-	return replyList;
-
-def getComments(items):
-	commentList = [];
-
-	for i in range(len(items)):
-		item = items[i]["snippet"]["topLevelComment"]["snippet"];
-		getReplies(items[i]);
-		comment = Comment(text=item["textOriginal"], author=item["authorDisplayName"], likes=item["likeCount"], id=item["authorChannelId"], time=["publishedAt"]);
-		commentList.append(comment);
-		replies.extend(getReplies(item));
-
-	return commentList;
-
-def formatCommentsForDisplay(comments):
-	formatted = "";
-
-	for i in range(len(comments)):
-		formatted = formatted + str(i) + ") "
-		formatted = formatted + comments[i].getText().encode('utf-8','ignore');
-		formatted = formatted + "\n";
-
-	return formatted;
+	return id;
 
 def displayComments():
 	if len(comments) == 0:
 		return;
 
-	commentDisplayBox.insert(END, formatCommentsForDisplay(comments));
-	commentsVScroll.config(command=commentDisplayBox.yview);
+	leftCommentList.setText(formatCommentsForDisplay(comments));
 
-def getByID(vid):
-	results = comment_threads_list_by_video_id(service, part='snippet, replies', videoId=vid, maxResults=100)
+def appendComments():
+	getByID(getVideoID());
+	commentsLength.setText(commentsLengthPrefix + str(len(comments)));
+	commentsLength.resize(commentsLength.sizeHint());
+	commentsLength.move(0, 430);
 
-	while("nextPageToken" in results.keys()):
-		nextToken = results["nextPageToken"];
+def clearComments():
+	del comments[:]
+	del replies[:]
+	del authors[:]
 
-		items = results["items"];
+def clearDisplay():
+	clearComments()
 
-		comments.extend(getComments(items));
+	leftCommentList.setText("")
+	commentsLength.setText(commentsLengthPrefix)
 
-		results = comment_threads_list_by_video_id(service, part='snippet, replies', videoId=vid, maxResults=100, pageToken=nextToken)
+main = QtGui.QApplication(sys.argv);
+window = QtGui.QWidget();
+widget = QWidget(window);
 
-	items = results["items"];
-	comments.extend(getComments(items));
+window.resize(1024, 768);
+window.setWindowTitle("YouTube Comment Analytics");
 
-	numComments.set("Number of Comments: " + str(len(comments)));
+idInput = QLineEdit(widget);
+idInput.move(0, 400);
 
-def getVideoID(*args):
-	idOfVideo = vidEntry.get();
-	ID.set("Obtaining comments for video: " + vidEntry.get());
-	getByID(idOfVideo);
-	return idOfVideo;
+commentsLengthPrefix = "Number Of Comments: "
+commentsLength = QLabel(widget);
+commentsLength.setText(commentsLengthPrefix);
+commentsLength.resize(commentsLength.sizeHint());
+commentsLength.move(0, 430);
 
-root = Tk();
+getButton = QPushButton("Get Comments", widget);
+getButton.setToolTip("Get the comments entered video");
+getButton.clicked.connect(appendComments);
+getButton.resize(getButton.sizeHint());
+getButton.move(0, 450);
 
-ID = StringVar();
-numComments = StringVar();
+displayButton = QPushButton("Display Comments", widget);
+displayButton.setToolTip("Display the list of comments");
+displayButton.clicked.connect(displayComments);
+displayButton.resize(displayButton.sizeHint());
+displayButton.move(110, 450);
 
-mainframe = Frame(root);
-mainframe.grid(row=0, column=0);
+clearButton = QPushButton("Clear Comment List", widget);
+clearButton.setToolTip("Dump current list of comments and clear display")
+clearButton.clicked.connect(clearDisplay)
+clearButton.resize(clearButton.sizeHint())
+clearButton.move(240, 450);
 
-#commentFrame = Frame(mainframe);
-#commentFrame.grid(row=4);
+leftCommentList = QTextEdit(widget);
+leftCommentList.setReadOnly(True);
+leftCommentList.resize(520, 364);
+leftCommentList.move(0, 0);
 
-#commentsVScroll = Scrollbar(commentFrame);
-commentsVScroll = Scrollbar(mainframe);
-commentsVScroll.grid(row=4, column=5);
-
-getIDLabel = Label(mainframe, text="Video ID");
-getIDLabel.grid(row=0, column=0);
-
-vidEntry = Entry(mainframe);
-vidEntry.grid(row=0, column=1);
-
-getButton = Button(mainframe, text="Get Comments", command=getVideoID);
-getButton.grid(row=2);
-
-displayButton = Button(mainframe, text="Display Comments", command=displayComments);
-displayButton.grid(row=3);
-
-#idLabel = Label(mainframe, textvariable=ID);
-#idLabel.grid(row=0, column=2);
-
-#commentDisplayBox = Text(commentFrame, height=30, width=150, yscrollcommand=commentsVScroll.set);
-commentDisplayBox = Text(mainframe, height=30, width=100, yscrollcommand=commentsVScroll.set);
-commentDisplayBox.grid(row=4, column=0);
-
-numCommentsLabel = Label(mainframe, textvariable=numComments);
-numCommentsLabel.grid(row=5, column=0);
-
-root.mainloop();
+window.show();
+sys.exit(main.exec_());
