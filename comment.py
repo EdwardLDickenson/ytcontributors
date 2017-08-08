@@ -14,7 +14,6 @@ class Comment:
 		self.commentTimeStamp = time;
 
 	#	Accesesors
-
 	def getText(self):
 		return self.commentText;
 
@@ -24,14 +23,13 @@ class Comment:
 	def getAuthor(self):
 		return self.commentAuthor;
 
-	def getID(self):
+	def getId(self):
 		return self.commentAuthorID;
 
 	def getTime(self):
 		return self.commentTimeStamp;
 
 	#	Mutators
-
 	def setText(self, newText):
 		self.commentText = newText;
 

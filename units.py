@@ -1,5 +1,6 @@
 #	Import YouTube API and whatever API wrappers are being used
 from getcomments import *
+from main import *
 
 #	Import internal methods and structures
 from comment import *
@@ -28,7 +29,7 @@ def testCommentClass():
 		log.write("getAuthor failed on an empty comment constructor\n");
 		result = False;
 
-	if empty.getID() != "":
+	if empty.getId() != "":
 		log.write("getID failed on an empty comment constructor\n");
 		result = False;
 
@@ -54,15 +55,62 @@ def testCommentClass():
 		generateErrorMessage("setAuthor failed on non-empty string", empty.getAuthor(), testAuthor);
 		result = False;
 
-	
+	testId = "ID is probably alpha numeric123"
+	empty.setId(testId);
+	if empty.getId() != testId:
+		generateErrorMessage("setId failed on non-empty string", empty.getId(), testId);
+		result = False
+
+	testTime = "also alphanumeric123"
+	empty.setTime(testTime)
+	if empty.getTime() != "also alphanumeric123":
+		generateErrorMessage("setTime failed on non-empty string", empty.getTime(), testTime)
+		result = False
+
+	return result;
+
+def testGetComments():
+	result = True
+	testList = []
+	testReplies = []
+
+	testList = getById("pDIQ7Otf1mw")	#	Soulshine
+
+	if str(type(testList)) != "<type 'list'>":
+		generateErrorMessage("Fatal Error, list generated from video ID is not of list type", "<type 'list'>", str(type(testList)));
+
+		return False;
+
+	if len(testList) == 0:	#	Assuming that the comments are not disabled
+		generateErrorMessage("getCommentsById failed on a video");
+		result = False;
+
+	#for i in range(len(testList)):
+	#	print(getReplies(testList[i]))
+
+	return result
+
+def testUi():
+	result = True;
 
 	return result;
 
 print("===\tStarting Unit Tests\t===");
 
-
 if testCommentClass() == False:
 	log.write("testCommentClass failed");
 
+if testUi() == False:
+	log.write("testUi failed");
+
+if testGetComments() == False:
+	log.write("testGetComments failed");
+
+print(len(replies))
+print(len(comments))
+
 log.close();
 print("===\tEnding Unit Tests\t===");
+
+#	Should test the strings for illegal characters
+#	Also, should make the csv file an actual csv file
