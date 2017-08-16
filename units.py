@@ -69,6 +69,17 @@ def testCommentClass():
 
 	return result;
 
+def testGetById():
+	result = True
+
+	commentsOnVideo = getById("pDIQ7Otf1mw")
+
+	for i in range(len(commentsOnVideo.keys())):
+		print(len(commentsOnVideo[commentsOnVideo.keys()[i]]))
+
+
+	return result
+
 def testGetComments():
 	result = True
 	testList = []
@@ -85,8 +96,14 @@ def testGetComments():
 		generateErrorMessage("getCommentsById failed on a video");
 		result = False;
 
-	#for i in range(len(testList)):
-	#	print(getReplies(testList[i]))
+	replyList = []
+
+	# for i in range(len(testList)):
+	# 	replyList.extend(getReplies(testList[i]))
+
+	# print(type(testList[0]))
+	# if type(str(testList)) != "<type 'instance'>":
+	# 	print("gfndjklgnfl")
 
 	return result
 
@@ -103,7 +120,7 @@ if testCommentClass() == False:
 if testUi() == False:
 	log.write("testUi failed");
 
-if testGetComments() == False:
+if testGetById() == False:
 	log.write("testGetComments failed");
 
 print(len(replies))

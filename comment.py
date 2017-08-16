@@ -45,4 +45,8 @@ class Comment:
 	def setTime(self, newTime):
 		self.commentTimeStamp = newTime;
 
+	#	Utility
+	def toString(self):
+		pass
+
 #	Most of the mutators will probably go unused, but it's nice to have them anway

@@ -11,6 +11,9 @@ authors = [];
 def parseComment(item):
 	comment = Comment()
 
+	if str(type(item)) == "<type 'instance'>":
+		return item
+
 	#	If it's a root level comment then strip the rest from the content
 	if "snippet" in item:
 		item = item["snippet"]["topLevelComment"]["snippet"]
@@ -57,63 +60,91 @@ def parseComment(item):
 	return comment
 
 def getReplies(comment):
+	if str(type(comment)) != "<type 'list'>":
+		return
+
 	replyList = [];
 
-	if "replies" in comment.keys():
-		for i in range(len(comment["replies"]["comments"])):
-			replyList.append(parseComment(comment["replies"]["comments"][i]["snippet"]))
+	if str(type(comment)) == "<type 'dict'>":
+		if "items" in comment.keys():
+			comment = comment["items"]
+
+	for i in range(len(comment)):
+		if "replies" in comment[i].keys():
+			for j in range(len(comment[i]["replies"]["comments"])):
+				replyList.append(comment[i]["replies"]["comments"][j]["snippet"])
 
 	return replyList;
 
-def getComments(items):
-	# commentList = [];
-	#
-	# for i in range(len(items)):
-	# 	replies.extend(getReplies(items[i]));
-	# 	item = items[i]["snippet"]["topLevelComment"]["snippet"];
-	# 	commentList.append(parseComment(item))
-	#
-	# return commentList;
+#	Actually, it's get the instance not the dict
+def getCommentDict(items):
+	results = []
+	return parseComment(items["snippet"]["topLevelComment"]["snippet"])
 
+def constructCommentReplyMap(commentList, replyList):
+	IdList = []
+	keyList = []
+	orderedReplyList = []
+	cmnt = Comment()
+	results = {}
+
+	for i in range(len(commentList)):
+		items = commentList[i]["items"]
+		for j in range(len(items)):
+			IdList.append(items[j]["id"])
+			keyList.append(getCommentDict(items[j]))
+			keyList[j].setId(IdList[j]);
+
+			#results.update({parseComment(items[j].setId()): []})
+
+	for i in range(len(replyList)):
+		parent = replyList[i]["parentId"]
+		index = IdList.index(parent)
+		value = []	#	Not creative, but technically correct term
+
+		if keyList[index] in results.keys():
+			value.extend(results[keyList[index]])
+
+		value.append(replyList[i])
+		results.update({keyList[index]: value})
+
+	return results
+
+def getById(vid):
+	nextToken = " "
+	results = []
 	commentList = []
+	replyList = []
 
-	for i in range(len(items)):
-		commentList.append(items[i])
+	#	Benchmark the relative sizes of maxResults and the time it takes to download the comments
+	while nextToken != "":
+		results = comment_threads_list_by_video_id(service, part='snippet, replies', videoId=vid, maxResults=100, pageToken=nextToken)
 
-	return commentList
+		commentList.append(results)
 
-# def getCommentObject(items):
-# 	commentList = []
-#
-# 	for i in range(len(items)):
-# 		commentList.append(items[i])
-#
-# 	return commentList
+		if "nextPageToken" in results.keys():
+			nextToken = results["nextPageToken"]
 
-def formatCommentsForDisplay(comments):
+		else:
+			nextToken = ""
+
+		replyList.extend(getReplies(results["items"]))
+		print("Comments: " + str(len(commentList) * 100- 100) + " - " + str(len(commentList) * 100))
+
+	return constructCommentReplyMap(commentList, replyList)
+	#comments.extend(commentList)	#	Should not be included in later revisions
+	#replies.extend(replyList)	#	Should not be included in later revisions
+	#return commentList
+
+def formatCommentsForDisplay(commentList):
 	formatted = "";
 
-	for i in range(len(comments)):
+	for i in range(len(commentList)):
 		formatted = formatted + str(i) + ") "
-		#formatted = formatted + comments[i].getText().encode('utf-8','ignore');
-		formatted = formatted + parseComment(comments[i]).getText().encode('utf-8','ignore');
+		formatted = formatted + parseComment(commentList[i]).getText().encode('utf-8','ignore');
 		formatted = formatted + "\n";
 
 	return formatted;
-
-def getById(vid):
-	results = comment_threads_list_by_video_id(service, part='snippet, replies', videoId=vid, maxResults=100)
-
-	while("nextPageToken" in results.keys()):
-		nextToken = results["nextPageToken"];
-		items = results["items"];
-		comments.extend(getComments(items));
-		results = comment_threads_list_by_video_id(service, part='snippet, replies', videoId=vid, maxResults=100, pageToken=nextToken)
-
-	items = results["items"];
-	comments.extend(getComments(items));
-
-	return comments
 
 def clearComments():
 	del comments[:]
