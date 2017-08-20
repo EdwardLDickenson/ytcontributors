@@ -8,6 +8,7 @@ comments = [];
 replies = [];
 authors = [];
 
+#	A significant percentage of the functionality in this file could be wrapped into the comment class
 def parseComment(item):
 	comment = Comment()
 
@@ -76,11 +77,11 @@ def getReplies(comment):
 
 	return replyList;
 
-#	Actually, it's get the instance not the dict
-def getCommentDict(items):
+def getComment(items):
 	results = []
 	return parseComment(items["snippet"]["topLevelComment"]["snippet"])
 
+#	Currently only includes comments with replies. This is obviously wrong
 def constructCommentReplyMap(commentList, replyList):
 	IdList = []
 	keyList = []
@@ -92,10 +93,8 @@ def constructCommentReplyMap(commentList, replyList):
 		items = commentList[i]["items"]
 		for j in range(len(items)):
 			IdList.append(items[j]["id"])
-			keyList.append(getCommentDict(items[j]))
+			keyList.append(getComment(items[j]))
 			keyList[j].setId(IdList[j]);
-
-			#results.update({parseComment(items[j].setId()): []})
 
 	for i in range(len(replyList)):
 		parent = replyList[i]["parentId"]
@@ -103,10 +102,14 @@ def constructCommentReplyMap(commentList, replyList):
 		value = []	#	Not creative, but technically correct term
 
 		if keyList[index] in results.keys():
-			value.extend(results[keyList[index]])
+			value.extend(results[parseComment(keyList[index])])
 
-		value.append(replyList[i])
+		value.append(parseComment(replyList[i]))
 		results.update({keyList[index]: value})
+
+	for i in range(len(keyList)):
+		if keyList[i] not in results.keys():
+			results.update({keyList[i]: []})
 
 	return results
 
@@ -129,12 +132,16 @@ def getById(vid):
 			nextToken = ""
 
 		replyList.extend(getReplies(results["items"]))
-		print("Comments: " + str(len(commentList) * 100- 100) + " - " + str(len(commentList) * 100))
+		print("Comments: " + str(len(commentList) * 100 - 100) + " - " + str(len(commentList) * 100))
 
 	return constructCommentReplyMap(commentList, replyList)
-	#comments.extend(commentList)	#	Should not be included in later revisions
-	#replies.extend(replyList)	#	Should not be included in later revisions
-	#return commentList
+
+def formatCommentForDisplay(comment, index):
+	formatted = "" + str(index) + ")"
+	formatted = formatted + parseComment(comment).getText().encode("utf-8", "ignore")
+	formatted = formatted + "\n"
+
+	return formatted
 
 def formatCommentsForDisplay(commentList):
 	formatted = "";
