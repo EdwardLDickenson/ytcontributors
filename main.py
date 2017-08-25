@@ -78,38 +78,33 @@ def getReplies(comment):
 	return replyList;
 
 def getComment(items):
-	results = []
-	return parseComment(items["snippet"]["topLevelComment"]["snippet"])
+	comment = Comment()
+	comment.parseComment(items)
+	return comment
 
 #	Currently only includes comments with replies. This is obviously wrong
 def constructCommentReplyMap(commentList, replyList):
-	IdList = []
 	keyList = []
-	orderedReplyList = []
-	cmnt = Comment()
 	results = {}
 
+	#	Very inefficient, removing some list elements would probably make it faster
 	for i in range(len(commentList)):
-		items = commentList[i]["items"]
-		for j in range(len(items)):
-			IdList.append(items[j]["id"])
-			keyList.append(getComment(items[j]))
-			keyList[j].setId(IdList[j]);
-
-	for i in range(len(replyList)):
-		parent = replyList[i]["parentId"]
-		index = IdList.index(parent)
-		value = []	#	Not creative, but technically correct term
-
-		if keyList[index] in results.keys():
-			value.extend(results[parseComment(keyList[index])])
-
-		value.append(parseComment(replyList[i]))
-		results.update({keyList[index]: value})
+		#	If/when the video class is written this probably should be wrapped into it
+		itemList = commentList[i]["items"]
+		for i in range(len(itemList)):
+			comment = Comment()
+			comment.parseComment(itemList[i])
+			keyList.append(comment)
 
 	for i in range(len(keyList)):
-		if keyList[i] not in results.keys():
-			results.update({keyList[i]: []})
+		values = []
+		for j in range(len(replyList)):
+			if replyList[j]["parentId"] == keyList[i].getId():
+				tmp = Comment()
+				tmp.parseComment(replyList[j])
+				values.append(tmp)
+
+		results.update({keyList[i]: values})
 
 	return results
 

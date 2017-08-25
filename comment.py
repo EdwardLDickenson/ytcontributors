@@ -16,6 +16,58 @@ class Comment:
 		self.commentTimeStamp = time;
 		self.commentReplyCount = replyCount
 
+	#	setByDict still needs to be defined even if the constructor accepts the same input
+	def parseComment(self, dict):
+		if str(type(dict)) != "<type 'dict'>":
+			return
+
+		if "id" in dict.keys():
+			self.setId(dict["id"])
+
+		if "snippet" in dict.keys():
+			dict = dict["snippet"]["topLevelComment"]["snippet"]
+
+		dictKeys = dict.keys()
+
+		if "textOriginal" in dictKeys:
+			pass
+
+		if "textDisplay" in dictKeys:
+			self.setText(dict["textDisplay"])
+
+		if "authorDisplayName" in dictKeys:
+			self.setAuthor(dict["authorDisplayName"])
+
+		if "likeCount" in dictKeys:
+			self.setLikes(dict["likeCount"])
+
+		if "publishedAt" in dictKeys:
+			self.setTime(dict["publishedAt"])
+
+		if "channelId" in dictKeys:
+			pass
+
+		if "updatedAt" in dictKeys:
+			pass
+
+		if "videoId" in dictKeys:
+			pass
+
+		if "parentId" in dictKeys:
+			pass
+
+		if "canRate" in dictKeys:
+			pass
+
+		if "viewerRating" in dictKeys:
+			pass
+
+		if "moderationStatus" in dictKeys:
+			pass
+
+		if "textOriginal" in dictKeys:
+			pass
+
 	#	Accesesors
 	def getText(self):
 		return self.commentText;

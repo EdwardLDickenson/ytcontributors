@@ -2,6 +2,7 @@
 from getcomments import *
 from main import *
 from ui import *
+from commentlist import *
 
 #	Import internal methods and structures
 from comment import *
@@ -186,30 +187,24 @@ def testGetById():
 				generateErrorMessage("Values contained in lists from getById are not of instance type", "<type 'instance'>", str(type(values[i][j])))
 				results = False
 
-	return result
-
-def testGetComments():
-	result = True
-	testList = []
-	testReplies = []
-
-	testList = getById("pDIQ7Otf1mw")	#	Soulshine
-
-	if str(type(testList)) != "<type 'list'>":
-		generateErrorMessage("Fatal Error, list generated from video ID is not of list type", "<type 'list'>", str(type(testList)));
-
-		return False;
-
-	if len(testList) == 0:	#	Assuming that the comments are not disabled
-		generateErrorMessage("getCommentsById failed on a video");
-		result = False;
-
-	replyList = []
+	#	Check to make sure that the replies are not contained in the comment list as well
+	#	Additionally, the raw lengths of the values and keys lists are always equal, however many of the values elements are empty
 
 	return result
 
 def testUi():
 	result = True;
+
+	videoId = getVideoId()
+	if videoId == "":
+		generateErrorMessage("getVideoId returns an empty string", "dummy value", videoId)
+		results = False
+
+	testString = "xyz"
+	idInput.setText(testString)
+
+	if idInput.text() != testString:
+		generateErrorMessage(testString, idInput.text(), testString)
 
 	return result;
 
@@ -222,11 +217,9 @@ if testUi() == False:
 	log.write("testUi failed");
 
 if testGetById() == False:
-	log.write("testGetComments failed");
+	log.write("testGetById failed");
 
 log.close();
-
-comments = getById("pDIQ7Otf1mw")
 
 print("===\tEnding Unit Tests\t===");
 
