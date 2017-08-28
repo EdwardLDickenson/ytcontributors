@@ -131,6 +131,7 @@ class Comment:
 		return result
 
 	def format(self, index):
+		#	Index does not strictly have to be a number.  
 		result = "" + str(index) + ") "
 		result = result + self.commentText
 		result = result + "\n"

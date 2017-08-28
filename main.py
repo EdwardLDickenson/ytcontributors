@@ -116,7 +116,18 @@ def getById(vid):
 
 	#	Benchmark the relative sizes of maxResults and the time it takes to download the comments
 	while nextToken != "":
-		results = comment_threads_list_by_video_id(service, part='snippet, replies', videoId=vid, maxResults=100, pageToken=nextToken)
+		getFailed = True
+
+		if nextToken == "":
+			getFailed = False
+
+		while getFailed:
+			try:
+				results = comment_threads_list_by_video_id(service, part='snippet, replies', videoId=vid, maxResults=100, pageToken=nextToken)
+				getFailed = False
+
+			except:
+				print("Error requesting comment thread. Probably either malformed request(possible erata) or poor internet connection. Retrying")
 
 		commentList.append(results)
 
@@ -127,7 +138,7 @@ def getById(vid):
 			nextToken = ""
 
 		replyList.extend(getReplies(results["items"]))
-		print("Comments: " + str(len(commentList) * 100 - 100) + " - " + str(len(commentList) * 100))
+		print("Acquiring comments: " + str(len(commentList) * 100 - 100) + " - " + str(len(commentList) * 100))
 
 	return constructCommentReplyMap(commentList, replyList)
 

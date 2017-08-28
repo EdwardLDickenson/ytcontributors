@@ -146,6 +146,7 @@ def testCommentClass():
 		generateErrorMessage("toString failed on two identical objects", str(False), str(constructed.toString() != empty.toString()))
 		result = False
 
+	#	This should be updated to allow different formats
 	formattedComment = str(0) + ") " + constructed.getText() + "\n"
 	if constructed.format(0) != formattedComment:
 		generateErrorMessage("Format comment failed on constructed comment", formattedComment, constructed.format(0))

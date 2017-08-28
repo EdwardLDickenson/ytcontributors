@@ -9,3 +9,17 @@ class commentList:
 
 	def setComments(self, list):
 		self.commentMap = list
+
+	def getRepliesTo(self, comment):
+		#	Test to make sure that comment is comment type
+		return self.commentMap[comment]
+
+	def searchString(self, string):
+		keys = self.commentMap.keys()
+		results = []
+
+		for i in range(len(keys)):
+			if string in keys[i].getText():
+				results.append(keys[i])
+
+		return results

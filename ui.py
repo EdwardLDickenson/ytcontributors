@@ -11,7 +11,9 @@ widget = QMainWindow()
 mainMenu = widget.menuBar()
 exitMenuButton = QAction("Exit", widget)
 leftCommentList = QTextEdit(widget)
-commentsLengthPrefix = "Number Of Comments: "
+filteredLeft = QTextEdit(widget)
+filteredLeftLength = QLabel()
+commentsLengthPrefix = "Number Of Comments: "	#	Not a UI element
 commentsLength = QLabel(widget)
 idLabel = QLabel(widget)
 idInput = QLineEdit(widget)
@@ -32,9 +34,9 @@ def getVideoId():
 
 	return id;
 
+#	Needs to be rewritten for an arbitrary display(QTextEdit)
 def displayComments():
 	keys = comments.getComments()
-	print(type(keys))
 	if len(keys) == 0:
 		return
 
@@ -42,6 +44,8 @@ def displayComments():
 
 	for i in range(len(keys)):
 		formattedString = formattedString + keys[i].format(i)
+		for j in range(len(comments.getRepliesTo(keys[i]))):
+			formattedString = formattedString + " " + comments.getRepliesTo(keys[i])[j].format(j)
 
 	leftCommentList.setText(formattedString)
 
@@ -52,6 +56,7 @@ def appendComments():
 
 	comments.setComments(commentsOnVideo)
 
+#	Needs to be rewritten for an arbitrary display(QTextEdit)
 def clearDisplay():
 	clearComments()
 
@@ -60,4 +65,11 @@ def clearDisplay():
 
 def getSearchQuery():
 	query = searchQuery.text()
-	print(query);
+
+	results = comments.searchString(query)
+	formattedString = ""
+	for i in range(len(results)):
+		formattedString = formattedString + results[i].format(i)
+
+	filteredLeft.setText("")
+	filteredLeft.setText(formattedString)

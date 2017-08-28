@@ -45,14 +45,13 @@ def get_authenticated_service(args):
 args = argparser.parse_args()
 service = get_authenticated_service(args)
 
-# Remove keyword arguments that are not set
 def remove_empty_kwargs(**kwargs):
-  good_kwargs = {}
-  if kwargs is not None:
-    for key, value in kwargs.iteritems():
-      if value:
-        good_kwargs[key] = value
-  return good_kwargs
+	good_kwargs = {}
+	if kwargs is not None:
+		for key, value in kwargs.iteritems():
+			if value:
+				good_kwargs[key] = value
+	return good_kwargs
 
 ### END BOILERPLATE CODE
 
